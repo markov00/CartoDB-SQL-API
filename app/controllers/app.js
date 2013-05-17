@@ -81,7 +81,7 @@ function sanitize_filename(filename) {
 // request handlers
 function handleQuery(req, res) {
 
-    var supportedFormats = ['json', 'geojson', 'topojson', 'csv', 'svg', 'shp', 'kml'];
+    var supportedFormats = ['json', 'geojson', 'topojson', 'csv', 'svg', 'shp', 'kml', 'bin'];
 
     // extract input
     var body      = (req.body) ? req.body : {};
@@ -293,7 +293,6 @@ function handleQuery(req, res) {
                     sql: sql,
                     filename: filename
                   }, this)
-                  return;
                 } else {
                   var opts = {
                     gn: gn,
@@ -350,14 +349,10 @@ function handleQuery(req, res) {
                       );
                     })
                   }
-                  return;
                 }
-
-                throw new Error("Unexpected format in packageResults: " + format);
             },
             function sendResults(err, out){
                 if (err) throw err;
-
                 // return to browser
                 if ( out ) res.send(out);
             },
@@ -417,30 +412,8 @@ ExportRequest.prototype.sendFile = function (err, filename, callback) {
 }
 
 
-function toKML(dbname, user_id, gcol, sql, skipfields, res, callback) {
-  toOGR_SingleFile(dbname, user_id, gcol, sql, skipfields, 'KML', 'kml', res, callback);
-}
-
 function getContentDisposition(format, filename, inline) {
-    var ext = 'json';
-    if (format === 'geojson'){
-        ext = 'geojson';
-    }
-    else if (format === 'topojson'){
-        ext = 'topojson';
-    }
-    else if (format === 'csv'){
-        ext = 'csv';
-    }
-    else if (format === 'svg'){
-        ext = 'svg';
-    }
-    else if (format === 'shp'){
-        ext = 'zip';
-    }
-    else if (format === 'kml'){
-        ext = 'kml';
-    }
+    var ext = formats[format].getFileExtension()
     var time = new Date().toUTCString();
     return ( inline ? 'inline' : 'attachment' ) +'; filename=' + filename + '.' + ext + '; modification-date="' + time + '";';
 }
