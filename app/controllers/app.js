@@ -81,7 +81,7 @@ function sanitize_filename(filename) {
 // request handlers
 function handleQuery(req, res) {
 
-    var supportedFormats = ['json', 'geojson', 'topojson', 'csv', 'svg', 'shp', 'kml', 'bin'];
+    var supportedFormats = ['json', 'geojson', 'topojson', 'csv', 'svg', 'shp', 'kml', 'arraybuffer'];
 
     // extract input
     var body      = (req.body) ? req.body : {};
