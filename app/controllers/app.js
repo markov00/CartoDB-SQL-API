@@ -109,7 +109,7 @@ function handleQuery(req, res) {
     var skipfields;
     var dp        = req.query.dp || body.dp; // decimal point digits (defaults to 6)
     var gn        = "the_geom"; // TODO: read from configuration file
-    var user_id;
+    var user_id   = req.query.user_id;
     var tableCacheItem;
     var requestProtocol = req.protocol;
 
@@ -121,6 +121,7 @@ function handleQuery(req, res) {
         filename  = (filename === "" || _.isUndefined(filename)) ? 'cartodb-query' : sanitize_filename(filename);
         sql       = (sql      === "" || _.isUndefined(sql))      ? null : sql;
         database  = (database === "" || _.isUndefined(database)) ? null : database;
+        user_id   = (user_id === "" || _.isUndefined(user_id)) ? null : user_id;
         limit     = (!_.isNaN(limit))  ? limit : null;
         offset    = (!_.isNaN(offset)) ? offset * limit : null;
 
@@ -159,37 +160,12 @@ function handleQuery(req, res) {
         // 4. Setup headers
         // 5. Send formatted results back
         Step(
-            function getDatabaseName() {
-                if (_.isNull(database)) {
-                    Meta.getDatabase(req, this);
-                } else {
-                    // database hardcoded in query string (deprecated??): don't use redis
-                    return database;
-                }
-            },
-            function setDBGetUser(err, data) {
-                if (err) throw err;
-
-                database = (data === "" || _.isNull(data) || _.isUndefined(data)) ? database : data;
-
-                // If the database could not be found, the user is non-existant
-                if (_.isNull(database)) {
-                    var msg = "Sorry, we can't find this CartoDB. Please check that you have entered the correct domain.";
-                    err = new Error(msg);
-                    err.http_status = 404;
-                    throw err;
-                }
-
-                if(api_key) {
-                    ApiKeyAuth.verifyRequest(req, this);
-                } else {
-                    oAuth.verifyRequest(req, this, requestProtocol);
-                }
-            },
-            function queryExplain(err, data){
-                if (err) throw err;
-                user_id = data;
+            
+            function queryExplain(){
+                
                 // store postgres connection
+                console.log("userid: "+user_id);
+                console.log("database: "+database);
                 pg = new PSQL(user_id, database);
 
                 authenticated = ! _.isNull(user_id);

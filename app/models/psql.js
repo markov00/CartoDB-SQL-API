@@ -38,18 +38,13 @@ var PSQL = function(user_id, db) {
     };
 
     me.username = function(){
-        var username = this.public_user;
-        if (_.isString(this.user_id))
-            username = _.template(global.settings.db_user, {user_id: this.user_id});
-
+        var username = this.user_id;
         return username;
     };
 
     me.database = function(){
         var database = db;
-        if (_.isString(this.user_id))
-            database = _.template(global.settings.db_base_name, {user_id: this.user_id});
-
+        
         return database;
     };
 
